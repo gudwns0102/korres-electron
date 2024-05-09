@@ -141,7 +141,7 @@ export function HomePage() {
           {
             title: "버튼",
             key: "button",
-            render: (text, record: Schedule) =>
+            render: (__, record: Schedule) =>
               tasks.find((task) => task.id === record.h_trn_no) ? (
                 <Button loading>예매중</Button>
               ) : (

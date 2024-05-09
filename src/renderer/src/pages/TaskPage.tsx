@@ -14,7 +14,7 @@ export function TaskPage() {
         {
           key: "schedule",
           title: "일정",
-          render: (text, record) => {
+          render: (__, record) => {
             return (
               <div>
                 <Typography.Text>
