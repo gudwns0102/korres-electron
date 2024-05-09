@@ -9,8 +9,11 @@ type FieldType = {
 export function LoginPage() {
   const session = useSession();
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    if (values.id && values.password) session.login(values.id, values.password);
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    if (values.id && values.password) {
+      console.log(await session.login(values.id, values.password));
+      console.log(session.cookieJar.toJSON());
+    }
   };
 
   const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
@@ -29,7 +32,7 @@ export function LoginPage() {
         name="password"
         rules={[{ required: true, message: "코레일 회원번호를 입력해 주세요" }]}
       >
-        <Input type="password" placeholder="비밀번호" autoFocus />
+        <Input type="password" placeholder="비밀번호" />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" className="login-form-button">

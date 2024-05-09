@@ -1,20 +1,27 @@
+import { CalendarOutlined, LogoutOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { Menu, Typography } from "antd";
 import { KorailSession, LoginSuccessResponse, Schedule } from "korail-ts";
 import _ from "lodash";
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Link,
+  Outlet,
+  Route,
+  RouterProvider
+} from "react-router-dom";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
-
-type Task = {
-  schedule: Schedule;
-  retries: number;
-};
+import { MyTicketsPage } from "./pages/MyTicketsPage";
+import { TaskPage } from "./pages/TaskPage";
 
 export const AppContext = createContext<{
   session: KorailSession;
   me: LoginSuccessResponse | null;
   tasks: Task[];
   addTask: (schedule: Schedule) => void;
-  removeTask: (h_trn_no: string) => void;
+  removeTask: (task: Task) => void;
 }>(undefined as any);
 
 function App(): JSX.Element {
@@ -25,10 +32,22 @@ function App(): JSX.Element {
   useEffect(() => {
     session.addEventListener("login", (response) => {
       setMe(response);
+      window.localStorage.setItem("me", JSON.stringify(response));
     });
 
     session.addEventListener("logout", () => {
       setMe(null);
+      window.localStorage.removeItem("me");
+    });
+
+    session.myTicketList().then((response) => {
+      if (response.data.strResult === "SUCC") {
+        const meStr = window.localStorage.getItem("me");
+
+        if (meStr) {
+          setMe(JSON.parse(meStr));
+        }
+      }
     });
   }, []);
 
@@ -69,7 +88,7 @@ function App(): JSX.Element {
    * do not reset timer even when tasks are changed
    */
   useEffect(() => {
-    if (me) {
+    if (me && tasks.length > 0) {
       const interval = setInterval(() => {
         runTasks();
       }, 5000);
@@ -81,6 +100,55 @@ function App(): JSX.Element {
 
     return;
   }, [me, tasks, runTasks]);
+
+  const router = useMemo(
+    () =>
+      createBrowserRouter(
+        createRoutesFromElements(
+          !me ? (
+            <Route path="*" element={<LoginPage />}></Route>
+          ) : (
+            <Route
+              path="*"
+              element={
+                <div style={{ display: "flex" }}>
+                  <Menu style={{ width: 256, height: "100vh", overflow: "scroll" }} mode="inline">
+                    <Menu.ItemGroup title="예매">
+                      <Menu.Item key="/" icon={<CalendarOutlined />}>
+                        <Link to="/">열차 목록</Link>
+                      </Menu.Item>
+                      <Menu.Item key="/macros" icon={<ShoppingOutlined />}>
+                        <Link to="/macros">매크로 내역</Link>
+                      </Menu.Item>
+                      <Menu.Item key="/tickets" icon={<ShoppingOutlined />}>
+                        <Link to="/tickets">나의 티켓</Link>
+                      </Menu.Item>
+                    </Menu.ItemGroup>
+                    <Menu.Divider />
+                    <Menu.ItemGroup title="인증정보">
+                      <Menu.Item disabled>
+                        <Typography.Text>You are: {me.strCustNm}</Typography.Text>
+                      </Menu.Item>
+                      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={session.logout}>
+                        로그아웃
+                      </Menu.Item>
+                    </Menu.ItemGroup>
+                  </Menu>
+                  <div style={{ flex: 1, height: "100vh", overflow: "scroll" }}>
+                    <Outlet />
+                  </div>
+                </div>
+              }
+            >
+              <Route index element={<HomePage />} />
+              <Route path="macros" element={<TaskPage />} />
+              <Route path="tickets" element={<MyTicketsPage />} />
+            </Route>
+          )
+        )
+      ),
+    [me]
+  );
 
   return (
     <AppContext.Provider
@@ -95,15 +163,27 @@ function App(): JSX.Element {
           }
 
           setTasks(
-            _.uniqBy([...tasks, { schedule, retries: 0 }], ({ schedule }) => schedule.h_trn_no)
+            _.uniqBy(
+              [
+                ...tasks,
+                {
+                  id: schedule.h_trn_no,
+                  schedule,
+                  retries: 0,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                }
+              ],
+              ({ id }) => id
+            )
           );
         },
-        removeTask: (h_trn_no) => {
-          setTasks(tasks.filter(({ schedule: s }) => s.h_trn_no !== h_trn_no));
+        removeTask: ({ id }) => {
+          setTasks(tasks.filter((task) => task.id !== id));
         }
       }}
     >
-      <div>{!me ? <LoginPage /> : <HomePage />}</div>
+      <RouterProvider router={router} />
     </AppContext.Provider>
   );
 }

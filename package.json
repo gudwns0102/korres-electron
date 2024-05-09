@@ -33,8 +33,10 @@
     "axios": "^1.6.8",
     "dayjs": "^1.11.11",
     "electron-updater": "^6.1.7",
+    "korail-ts": "file:../korail-ts",
     "lodash": "^4.17.21",
-    "qs": "^6.12.1"
+    "qs": "^6.12.1",
+    "react-router-dom": "^6.23.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",

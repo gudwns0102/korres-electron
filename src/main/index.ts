@@ -35,7 +35,7 @@ function createWindow(): void {
   });
 
   session.defaultSession.webRequest.onHeadersReceived(
-    { urls: ["https://smart.letskorail.com/classes/com.korail.mobile.login.Login"] },
+    { urls: ["https://smart.letskorail.com"] },
     (details, callback) => {
       if (
         details.responseHeaders &&
