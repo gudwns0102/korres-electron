@@ -10,7 +10,7 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    icon: icon,
+    icon,
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -35,7 +35,7 @@ function createWindow(): void {
   });
 
   session.defaultSession.webRequest.onHeadersReceived(
-    { urls: ["https://smart.letskorail.com"] },
+    { urls: ["https://smart.letskorail.com/*"] },
     (details, callback) => {
       if (
         details.responseHeaders &&

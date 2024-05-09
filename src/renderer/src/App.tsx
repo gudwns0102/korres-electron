@@ -132,6 +132,12 @@ function App(): JSX.Element {
                       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={session.logout}>
                         로그아웃
                       </Menu.Item>
+                      <Menu.Item disabled>
+                        <Typography.Text>
+                          {window.electron.process.env.npm_package_name}:
+                          {window.electron.process.env.npm_package_version}
+                        </Typography.Text>
+                      </Menu.Item>
                     </Menu.ItemGroup>
                   </Menu>
                   <div style={{ flex: 1, height: "100vh", overflow: "scroll" }}>
