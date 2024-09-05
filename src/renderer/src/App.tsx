@@ -1,4 +1,5 @@
 import { CalendarOutlined, LogoutOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Button, Menu, Typography } from "antd";
 import axios from "axios";
 import { KorailSession, LoginSuccessResponse, Schedule } from "korail-ts";
@@ -228,45 +229,44 @@ function App(): JSX.Element {
     [me]
   );
 
-  return (
-    <AppContext.Provider
-      value={{
-        session,
-        me,
-        tasks,
-        addTask: (schedule) => {
-          if (_.find(tasks, ({ schedule: s }) => s.h_trn_no === schedule.h_trn_no)) {
-            window.alert("이미 추가된 스케줄입니다.");
-            return;
-          }
+  const queryClient = new QueryClient();
 
-          setTasks(
-            _.uniqBy(
-              [
-                ...tasks,
-                {
-                  id: schedule.h_trn_no,
-                  schedule,
-                  retries: 0,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                }
-              ],
-              ({ id }) => id
-            )
-          );
-        },
-        removeTask: ({ id }) => {
-          setTasks(tasks.filter((task) => task.id !== id));
-        },
-        kakao: {
-          canSendMessage: !!authResponse,
-          sendMessage
-        }
-      }}
-    >
-      <RouterProvider router={router} />
-    </AppContext.Provider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContext.Provider
+        value={{
+          session,
+          me,
+          tasks,
+          addTask: (schedule) => {
+            if (_.find(tasks, ({ schedule: s }) => _.isEqual(s, schedule))) {
+              window.alert("이미 추가된 스케줄입니다.");
+              return;
+            }
+
+            setTasks([
+              ...tasks,
+              {
+                id: schedule.h_trn_no,
+                schedule,
+                retries: 0,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }
+            ]);
+          },
+          removeTask: ({ id }) => {
+            setTasks(tasks.filter((task) => task.id !== id));
+          },
+          kakao: {
+            canSendMessage: !!authResponse,
+            sendMessage
+          }
+        }}
+      >
+        <RouterProvider router={router} />
+      </AppContext.Provider>
+    </QueryClientProvider>
   );
 }
 

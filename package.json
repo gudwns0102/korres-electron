@@ -21,6 +21,7 @@
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.4.0",
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
     "@electron-toolkit/preload": "^3.0.0",
