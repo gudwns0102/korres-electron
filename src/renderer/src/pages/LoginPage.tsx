@@ -26,13 +26,13 @@ export function LoginPage() {
         name="id"
         rules={[{ required: true, message: "코레일 회원번호를 입력해 주세요" }]}
       >
-        <Input autoFocus placeholder="코레일 회원번호" />
+        <Input autoFocus placeholder="코레일 회원번호" defaultValue={""} />
       </Form.Item>
       <Form.Item<FieldType>
         name="password"
         rules={[{ required: true, message: "코레일 회원번호를 입력해 주세요" }]}
       >
-        <Input type="password" placeholder="비밀번호" />
+        <Input type="password" placeholder="비밀번호" defaultValue={""} />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" className="login-form-button">
