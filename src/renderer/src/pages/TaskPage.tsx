@@ -9,6 +9,7 @@ export function TaskPage() {
     <Table
       size="small"
       dataSource={tasks}
+      pagination={false}
       columns={[
         { key: "id", title: "열차 번호", dataIndex: "id" },
         {
@@ -18,11 +19,13 @@ export function TaskPage() {
             return (
               <div>
                 <Typography.Text>
-                  {record.schedule.h_dpt_rs_stn_nm}: {record.schedule.h_dpt_tm_qb}
+                  {record.schedule.h_dpt_rs_stn_nm}: {record.schedule.h_dpt_dt}{" "}
+                  {record.schedule.h_dpt_tm_qb}
                 </Typography.Text>
                 <Typography.Text>{" -> "}</Typography.Text>
                 <Typography.Text>
-                  {record.schedule.h_arv_rs_stn_nm}: {record.schedule.h_arv_tm_qb}
+                  {record.schedule.h_arv_rs_stn_nm}: {record.schedule.h_arv_dt}{" "}
+                  {record.schedule.h_arv_tm_qb}
                 </Typography.Text>
               </div>
             );
