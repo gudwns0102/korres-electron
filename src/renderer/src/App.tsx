@@ -1,24 +1,12 @@
-import { CalendarOutlined, LogoutOutlined, ShoppingOutlined } from "@ant-design/icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Button, Menu, Typography } from "antd";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 import axios from "axios";
 import { produce } from "immer";
 import { KorailSession, LoginSuccessResponse, Schedule } from "korail-ts";
 import _ from "lodash";
-import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Link,
-  Outlet,
-  Route,
-  RouterProvider
-} from "react-router-dom";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
-import { MyTicketsPage } from "./pages/MyTicketsPage";
-import { TaskPage } from "./pages/TaskPage";
+import { routeTree } from "./routeTree.gen";
 
 export const AppContext = createContext<{
   session: KorailSession;
@@ -31,6 +19,15 @@ export const AppContext = createContext<{
     sendMessage: (text: string) => void;
   };
 }>(undefined as any);
+
+const router = createRouter({ routeTree });
+
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 function App(): JSX.Element {
   const [session] = useState(new KorailSession());
@@ -151,77 +148,77 @@ function App(): JSX.Element {
     return;
   }, [me, tasks, sendMessage]);
 
-  const router = useMemo(
-    () =>
-      createBrowserRouter(
-        createRoutesFromElements(
-          !me ? (
-            <Route path="*" element={<LoginPage />}></Route>
-          ) : (
-            <Route
-              path="*"
-              element={
-                <div style={{ display: "flex" }}>
-                  <Menu style={{ width: 256, height: "100vh", overflow: "scroll" }} mode="inline">
-                    <Menu.ItemGroup title="예매">
-                      <Menu.Item key="/" icon={<CalendarOutlined />}>
-                        <Link to="/">열차 목록</Link>
-                      </Menu.Item>
-                      <Menu.Item key="/macros" icon={<ShoppingOutlined />}>
-                        <Link to="/macros">매크로 내역</Link>
-                      </Menu.Item>
-                      <Menu.Item key="/tickets" icon={<ShoppingOutlined />}>
-                        <Link to="/tickets">나의 티켓</Link>
-                      </Menu.Item>
-                    </Menu.ItemGroup>
-                    <Menu.Divider />
-                    <Menu.ItemGroup title="인증정보">
-                      <Menu.Item disabled>
-                        <Typography.Text>You are: {me.strCustNm}</Typography.Text>
-                      </Menu.Item>
-                      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={session.logout}>
-                        로그아웃
-                      </Menu.Item>
-                      <Menu.Item disabled>
-                        <Typography.Text>
-                          {window.electron.process.env.npm_package_name}:
-                          {window.electron.process.env.npm_package_version}
-                        </Typography.Text>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <Button
-                          onClick={() => {
-                            // window.Kakao.Auth.authorize({
-                            //   redirectUri: "http://localhost:8888",
-                            //   prompt: "login",
-                            //   scope: "talk_message"
-                            // });
+  // const router = useMemo(
+  //   () =>
+  //     createBrowserRouter(
+  //       createRoutesFromElements(
+  //         !me ? (
+  //           <Route path="*" element={<LoginPage />}></Route>
+  //         ) : (
+  //           <Route
+  //             path="*"
+  //             element={
+  //               <div style={{ display: "flex" }}>
+  //                 <Menu style={{ width: 256, height: "100vh", overflow: "scroll" }} mode="inline">
+  //                   <Menu.ItemGroup title="예매">
+  //                     <Menu.Item key="/" icon={<CalendarOutlined />}>
+  //                       <Link to="/">열차 목록</Link>
+  //                     </Menu.Item>
+  //                     <Menu.Item key="/macros" icon={<ShoppingOutlined />}>
+  //                       <Link to="/macros">매크로 내역</Link>
+  //                     </Menu.Item>
+  //                     <Menu.Item key="/tickets" icon={<ShoppingOutlined />}>
+  //                       <Link to="/tickets">나의 티켓</Link>
+  //                     </Menu.Item>
+  //                   </Menu.ItemGroup>
+  //                   <Menu.Divider />
+  //                   <Menu.ItemGroup title="인증정보">
+  //                     <Menu.Item disabled>
+  //                       <Typography.Text>You are: {me.strCustNm}</Typography.Text>
+  //                     </Menu.Item>
+  //                     <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={session.logout}>
+  //                       로그아웃
+  //                     </Menu.Item>
+  //                     <Menu.Item disabled>
+  //                       <Typography.Text>
+  //                         {window.electron.process.env.npm_package_name}:
+  //                         {window.electron.process.env.npm_package_version}
+  //                       </Typography.Text>
+  //                     </Menu.Item>
+  //                     <Menu.Item>
+  //                       <Button
+  //                         onClick={() => {
+  //                           // window.Kakao.Auth.authorize({
+  //                           //   redirectUri: "http://localhost:8888",
+  //                           //   prompt: "login",
+  //                           //   scope: "talk_message"
+  //                           // });
 
-                            window.open(
-                              "https://accounts.kakao.com/login/?login_type=normal&continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%2Fauthorize%3Fis_popup%3Dfalse%26ka%3Dsdk%252F2.7.2%2520os%252Fjavascript%2520sdk_type%252Fjavascript%2520lang%252Fko%2520device%252FMacIntel%2520origin%252Fhttp%25253A%25252F%25252Flocalhost%25253A5173%26scope%3Dtalk_message%26auth_tran_id%3DpxIwiQQmJkwchDO4.QlJnytF3DOxoQOd5qVBdueEhwaSTmKdHT~iQ3Q4_u~G%26response_type%3Dcode%26redirect_uri%3Dhttp%253A%252F%252Flocalhost%253A8888%26through_account%3Dtrue%26client_id%3D8aa1c2976d9ae39d730c75ba97629117&talk_login=hidden#login"
-                            );
-                          }}
-                        >
-                          카카오 로그인 테스트
-                        </Button>
-                      </Menu.Item>
-                    </Menu.ItemGroup>
-                  </Menu>
-                  <div style={{ flex: 1, height: "100vh", overflow: "scroll" }}>
-                    <Outlet />
-                  </div>
-                </div>
-              }
-            >
-              <Route index element={<HomePage />} />
-              <Route path="macros" element={<TaskPage />} />
-              <Route path="tickets" element={<MyTicketsPage />} />
-            </Route>
-          )
-        )
-      ),
-    [me]
-  );
+  //                           window.open(
+  //                             "https://accounts.kakao.com/login/?login_type=normal&continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%2Fauthorize%3Fis_popup%3Dfalse%26ka%3Dsdk%252F2.7.2%2520os%252Fjavascript%2520sdk_type%252Fjavascript%2520lang%252Fko%2520device%252FMacIntel%2520origin%252Fhttp%25253A%25252F%25252Flocalhost%25253A5173%26scope%3Dtalk_message%26auth_tran_id%3DpxIwiQQmJkwchDO4.QlJnytF3DOxoQOd5qVBdueEhwaSTmKdHT~iQ3Q4_u~G%26response_type%3Dcode%26redirect_uri%3Dhttp%253A%252F%252Flocalhost%253A8888%26through_account%3Dtrue%26client_id%3D8aa1c2976d9ae39d730c75ba97629117&talk_login=hidden#login"
+  //                           );
+  //                         }}
+  //                       >
+  //                         카카오 로그인 테스트
+  //                       </Button>
+  //                     </Menu.Item>
+  //                   </Menu.ItemGroup>
+  //                 </Menu>
+  //                 <div style={{ flex: 1, height: "100vh", overflow: "scroll" }}>
+  //                   <Outlet />
+  //                 </div>
+  //               </div>
+  //             }
+  //           >
+  //             <Route index element={<HomePage />} />
+  //             <Route path="macros" element={<TaskPage />} />
+  //             <Route path="tickets" element={<MyTicketsPage />} />
+  //           </Route>
+  //         )
+  //       )
+  //     ),
+  //   [me]
+  // );
 
   const queryClient = new QueryClient();
 

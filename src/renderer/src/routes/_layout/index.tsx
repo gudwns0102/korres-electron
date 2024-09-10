@@ -1,17 +1,22 @@
 import { SwapOutlined } from "@ant-design/icons";
-import { useQueue } from "@renderer/hooks/useQueue";
+import { AppContext } from "@renderer/App";
+import { useSession } from "@renderer/hooks/useSession";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button, DatePicker, Select, Table, Typography } from "antd";
 import dayjs from "dayjs";
 import { hhmmss, Schedule, Station, YYYYMMDD } from "korail-ts";
 import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { useSession } from "../hooks/useSession";
 
-export function HomePage() {
+export const Route = createFileRoute("/_layout/")({
+  component: Page
+});
+
+function Page() {
   const session = useSession();
-  const { tasks, addTask, removeTask } = useQueue();
+  const { tasks, addTask, removeTask } = useContext(AppContext);
 
   const [from, setFrom] = useLocalStorage("from", "서울");
   const [to, setTo] = useLocalStorage("to", "부산");

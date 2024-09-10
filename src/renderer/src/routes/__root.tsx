@@ -1,4 +1,8 @@
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+
+import { AppContext } from "@renderer/App";
 import { Button, Form, FormProps, Input } from "antd";
+import { useContext } from "react";
 import { useSession } from "../hooks/useSession";
 
 type FieldType = {
@@ -6,7 +10,17 @@ type FieldType = {
   password?: string;
 };
 
-export function LoginPage() {
+export const Route = createRootRoute({
+  component: () => {
+    const { me } = useContext(AppContext);
+
+    if (!me) return <LoginPage />;
+
+    return <Outlet />;
+  }
+});
+
+function LoginPage() {
   const session = useSession();
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {

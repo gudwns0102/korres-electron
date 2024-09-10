@@ -1,11 +1,17 @@
 import { LoadingOutlined } from "@ant-design/icons";
-import { useQueue } from "@renderer/hooks/useQueue";
+import { AppContext } from "@renderer/App";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button, Spin, Table, Typography } from "antd";
 import dayjs from "dayjs";
-import styles from "./TaskPage.module.css";
+import { useContext } from "react";
+import styles from "./tasks.module.css";
 
-export function TaskPage() {
-  const { tasks, removeTask } = useQueue();
+export const Route = createFileRoute("/_layout/tasks")({
+  component: Page
+});
+
+function Page() {
+  const { tasks, removeTask } = useContext(AppContext);
 
   return (
     <Table
@@ -24,11 +30,11 @@ export function TaskPage() {
                 </Typography.Text>
                 <div>
                   <Typography.Text>
-                    {record.schedule.h_dpt_rs_stn_nm}:{record.schedule.h_dpt_tm_qb}
+                    {record.schedule.h_dpt_rs_stn_nm} {record.schedule.h_dpt_tm_qb}
                   </Typography.Text>
                   <Typography.Text style={{ fontSize: "smaller" }}>{" → "}</Typography.Text>
                   <Typography.Text>
-                    {record.schedule.h_arv_rs_stn_nm}:{record.schedule.h_arv_tm_qb}
+                    {record.schedule.h_arv_rs_stn_nm} {record.schedule.h_arv_tm_qb}
                   </Typography.Text>
                 </div>
               </div>

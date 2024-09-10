@@ -31,6 +31,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@tanstack/react-query": "^5.54.1",
+    "@tanstack/react-router": "^1.56.5",
     "@types/kakao-js-sdk": "^1.39.5",
     "antd": "^5.17.0",
     "axios": "^1.7.7",
@@ -41,7 +42,6 @@
     "korail-ts": "file:../korail-ts",
     "lodash": "^4.17.21",
     "qs": "^6.12.1",
-    "react-router-dom": "^6.23.0",
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
@@ -53,6 +53,8 @@
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^2.4.0",
+    "@tanstack/router-devtools": "^1.56.5",
+    "@tanstack/router-plugin": "^1.57.1",
     "@types/lodash": "^4.17.1",
     "@types/node": "^18.19.9",
     "@types/react": "^18.2.48",
