@@ -133,6 +133,21 @@ function createWindow(): void {
     }
   );
 
+  session.defaultSession.webRequest.onHeadersReceived(
+    { urls: ["*://*/*"] },
+    (details, callback) => {
+      if (details.responseHeaders) {
+        if (details.responseHeaders["X-Frame-Options"]) {
+          delete details.responseHeaders["X-Frame-Options"];
+        } else if (details.responseHeaders["x-frame-options"]) {
+          delete details.responseHeaders["x-frame-options"];
+        }
+      }
+
+      callback({ cancel: false, responseHeaders: details.responseHeaders });
+    }
+  );
+
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {

@@ -2,6 +2,7 @@ import { CalendarOutlined, LogoutOutlined, ShoppingOutlined } from "@ant-design/
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Button, Menu, Typography } from "antd";
 import axios from "axios";
+import { produce } from "immer";
 import { KorailSession, LoginSuccessResponse, Schedule } from "korail-ts";
 import _ from "lodash";
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
@@ -34,7 +35,10 @@ export const AppContext = createContext<{
 function App(): JSX.Element {
   const [session] = useState(new KorailSession());
   const [me, setMe] = useState<LoginSuccessResponse | null>(null);
-  const [tasks, setTasks] = useState<Array<Task>>([]);
+  const [tasks, setTasks] = useLocalStorage<Array<Task>>("tasks", []);
+  const [latestResults, setLatestResult] = useState<
+    Array<{ strResult: "SUCC" | "FAIL"; h_msg_cd: string; h_msg_txt: string }>
+  >([]);
 
   const [authResponse, setAuthResponse] = useLocalStorage<KakaoAuthResponse | undefined>(
     "kakao-auth",
@@ -103,59 +107,49 @@ function App(): JSX.Element {
     });
   }, []);
 
-  console.log(authResponse);
-
-  const runTasks = useCallback(async () => {
-    const results = await Promise.allSettled(
-      tasks.map(({ schedule: s }) => {
-        return new Promise<string>((resolve, reject) => {
-          session.reserve(s).then((response) => {
-            if (response.data.strResult === "FAIL") {
-              return reject();
-            }
-
-            window.electron.ipcRenderer.send(
-              "show-notification",
-              "예매가 완료되었습니다.",
-              `${s.h_trn_clsf_nm} ${s.h_dpt_tm_qb} - ${s.h_arv_tm_qb}`
-            );
-
-            sendMessage("예매가 완료되었습니다. 15분 내로 결제 진행해 주세요.");
-
-            resolve(s.h_trn_no);
-          });
-        });
-      })
-    );
-
-    const h_trn_nos = results.map((r) => (r.status === "fulfilled" ? r.value : null));
-
-    setTasks(
-      tasks
-        .map((t) => ({ ...t, retries: t.retries + 1 }))
-        .filter(({ schedule }) => {
-          return !h_trn_nos.includes(schedule.h_trn_no);
-        })
-    );
-  }, [tasks, sendMessage]);
-
   /**
    * run runTasks each 5 seconds
    * do not reset timer even when tasks are changed
    */
   useEffect(() => {
     if (me && tasks.length > 0) {
-      const interval = setInterval(() => {
-        runTasks();
-      }, 5000);
+      const intervals = tasks.map((task, index) =>
+        setInterval(async () => {
+          const response = await session.reserve(task.schedule);
+
+          if (response.data.strResult === "SUCC") {
+            window.electron.ipcRenderer.send(
+              "show-notification",
+              "예매가 완료되었습니다.",
+              `${task.schedule.h_trn_clsf_nm} ${task.schedule.h_dpt_tm_qb} - ${task.schedule.h_arv_tm_qb}`
+            );
+
+            sendMessage("예매가 완료되었습니다. 15분 내로 결제 진행해 주세요.");
+          }
+
+          setLatestResult(
+            produce((draft) => {
+              draft[index] = response.data;
+            })
+          );
+
+          setTasks(
+            produce((draft) => {
+              draft[index].retries += 1;
+            })
+          );
+
+          return task;
+        }, task.interval)
+      );
 
       return () => {
-        clearInterval(interval);
+        intervals.forEach((interval) => clearInterval(interval));
       };
     }
 
     return;
-  }, [me, tasks, runTasks]);
+  }, [me, tasks, sendMessage]);
 
   const router = useMemo(
     () =>
@@ -237,7 +231,7 @@ function App(): JSX.Element {
         value={{
           session,
           me,
-          tasks,
+          tasks: tasks.map((task, index) => ({ ...task, latest_result: latestResults[index] })),
           addTask: (schedule) => {
             if (_.find(tasks, ({ schedule: s }) => _.isEqual(s, schedule))) {
               window.alert("이미 추가된 스케줄입니다.");
@@ -250,13 +244,14 @@ function App(): JSX.Element {
                 id: schedule.h_trn_no,
                 schedule,
                 retries: 0,
+                interval: 5000,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               }
             ]);
           },
-          removeTask: ({ id }) => {
-            setTasks(tasks.filter((task) => task.id !== id));
+          removeTask: (task) => {
+            setTasks(tasks.filter((t) => !_.isEqual(task, t)));
           },
           kakao: {
             canSendMessage: !!authResponse,

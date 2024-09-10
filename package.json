@@ -37,6 +37,7 @@
     "dayjs": "^1.11.11",
     "electron-updater": "^6.1.7",
     "fastify": "^4.28.1",
+    "immer": "^10.1.1",
     "korail-ts": "file:../korail-ts",
     "lodash": "^4.17.21",
     "qs": "^6.12.1",

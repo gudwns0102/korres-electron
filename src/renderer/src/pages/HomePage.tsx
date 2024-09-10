@@ -29,6 +29,7 @@ export function HomePage() {
   const { data, hasNextPage, isFetching, fetchNextPage } = useInfiniteQuery({
     enabled: Boolean(from && to),
     queryKey: ["schedules", from, to, YYYYMMDD] as const,
+    staleTime: Infinity,
     queryFn: async ({ queryKey: [__, from, to, date], pageParam }) => {
       const { data } = await session.scheduleView({
         dep: from!,
@@ -120,7 +121,12 @@ export function HomePage() {
             title: "열차",
             dataIndex: "h_trn_clsf_nm",
             key: "h_trn_clsf_nm",
-            align: "center"
+            align: "center",
+            filters: _.uniq(schedules.map((s) => s.h_trn_clsf_nm)).map((value) => ({
+              text: value,
+              value
+            })),
+            onFilter: (value, record) => record.h_trn_clsf_nm === value
           },
           {
             title: "출발",
@@ -144,7 +150,12 @@ export function HomePage() {
             title: "가격",
             dataIndex: "h_rsv_psb_nm",
             key: "h_rsv_psb_nm",
-            align: "center"
+            align: "center",
+            filters: _.uniq(schedules.map((s) => s.h_rsv_psb_nm)).map((value) => ({
+              text: value,
+              value
+            })),
+            onFilter: (value, record) => record.h_rsv_psb_nm === value
           },
           {
             title: "버튼",
@@ -154,7 +165,7 @@ export function HomePage() {
 
               return task ? (
                 <Button color="secondary" onClick={() => removeTask(task)}>
-                  예매취소
+                  예매 취소
                 </Button>
               ) : (
                 <Button type="primary" onClick={() => addTask(record)}>
