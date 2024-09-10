@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/react-router";
 import axios from "axios";
 import { produce } from "immer";
 import { KorailSession, LoginSuccessResponse, Schedule } from "korail-ts";
@@ -25,7 +25,14 @@ export const AppContext = createContext<{
   };
 }>(undefined as any);
 
-const router = createRouter({ routeTree });
+const memoryHistory = createMemoryHistory({
+  initialEntries: ["/"] // Pass your initial url
+});
+
+const router = createRouter({
+  routeTree,
+  history: memoryHistory
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
@@ -128,7 +135,14 @@ function App(): JSX.Element {
               `${task.schedule.h_trn_clsf_nm} ${task.schedule.h_dpt_tm_qb} - ${task.schedule.h_arv_tm_qb}`
             );
 
-            axios.post("http://localhost:8888/notify?email=sejong3408@gmail.com");
+            if (email) {
+              console.log(
+                `http://localhost:8888/notify?email=${email}&subject=${encodeURI(`${task.schedule.h_dpt_rs_stn_nm} ${task.schedule.h_dpt_tm_qb} ~ ${task.schedule.h_arv_rs_stn_nm} ${task.schedule.h_arv_tm_qb}`)}&content=${encodeURI("예매 확인 후 결제해 주세요")}`
+              );
+              axios.post(
+                `http://localhost:8888/notify?email=${email}&subject=${encodeURI(`${task.schedule.h_dpt_rs_stn_nm} ${task.schedule.h_dpt_tm_qb} ~ ${task.schedule.h_arv_rs_stn_nm} ${task.schedule.h_arv_tm_qb}`)}&content=${encodeURI("예매 확인 후 결제해 주세요")}`
+              );
+            }
 
             sendMessage("예매가 완료되었습니다. 15분 내로 결제 진행해 주세요.");
           }

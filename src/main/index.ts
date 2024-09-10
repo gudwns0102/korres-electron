@@ -114,9 +114,11 @@ function createWindow(): void {
         querystring: {
           type: "object",
           properties: {
-            email: { type: "string" }
+            email: { type: "string" },
+            subject: { type: "string" },
+            content: { type: "string" }
           },
-          required: ["email"]
+          required: ["email", "subject", "content"]
         }
       },
       handler: async (req, res) => {
@@ -125,10 +127,12 @@ function createWindow(): void {
           auth: { user: "sejong3408@gmail.com", pass: "tiye uzmm vnqs cqfd" }
         });
 
+        const { email, subject, content } = req.query as any;
+
         const mailOptions = {
-          to: (req.query as any).email,
-          subject: "가입 인증 메일",
-          html: `<div>예매 완료. 코레일 앱 > 예약 내역 확인에서 결제 진행 필요.</div>`
+          to: email,
+          subject: "[코레스] " + decodeURI(subject),
+          html: `<div>${decodeURI(content)}</div>`
         };
 
         await transporter.sendMail(mailOptions);
