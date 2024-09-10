@@ -18,6 +18,11 @@ export const AppContext = createContext<{
     canSendMessage: boolean;
     sendMessage: (text: string) => void;
   };
+  mail: {
+    email: string | null;
+    setEmail: (email: string) => void;
+    removeEmail: () => void;
+  };
 }>(undefined as any);
 
 const router = createRouter({ routeTree });
@@ -41,6 +46,8 @@ function App(): JSX.Element {
     "kakao-auth",
     undefined
   );
+
+  const [email, setEmail] = useLocalStorage("email", null as string | null);
 
   /**
    * For dynamic link
@@ -121,6 +128,8 @@ function App(): JSX.Element {
               `${task.schedule.h_trn_clsf_nm} ${task.schedule.h_dpt_tm_qb} - ${task.schedule.h_arv_tm_qb}`
             );
 
+            axios.post("http://localhost:8888/notify?email=sejong3408@gmail.com");
+
             sendMessage("예매가 완료되었습니다. 15분 내로 결제 진행해 주세요.");
           }
 
@@ -147,78 +156,6 @@ function App(): JSX.Element {
 
     return;
   }, [me, tasks, sendMessage]);
-
-  // const router = useMemo(
-  //   () =>
-  //     createBrowserRouter(
-  //       createRoutesFromElements(
-  //         !me ? (
-  //           <Route path="*" element={<LoginPage />}></Route>
-  //         ) : (
-  //           <Route
-  //             path="*"
-  //             element={
-  //               <div style={{ display: "flex" }}>
-  //                 <Menu style={{ width: 256, height: "100vh", overflow: "scroll" }} mode="inline">
-  //                   <Menu.ItemGroup title="예매">
-  //                     <Menu.Item key="/" icon={<CalendarOutlined />}>
-  //                       <Link to="/">열차 목록</Link>
-  //                     </Menu.Item>
-  //                     <Menu.Item key="/macros" icon={<ShoppingOutlined />}>
-  //                       <Link to="/macros">매크로 내역</Link>
-  //                     </Menu.Item>
-  //                     <Menu.Item key="/tickets" icon={<ShoppingOutlined />}>
-  //                       <Link to="/tickets">나의 티켓</Link>
-  //                     </Menu.Item>
-  //                   </Menu.ItemGroup>
-  //                   <Menu.Divider />
-  //                   <Menu.ItemGroup title="인증정보">
-  //                     <Menu.Item disabled>
-  //                       <Typography.Text>You are: {me.strCustNm}</Typography.Text>
-  //                     </Menu.Item>
-  //                     <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={session.logout}>
-  //                       로그아웃
-  //                     </Menu.Item>
-  //                     <Menu.Item disabled>
-  //                       <Typography.Text>
-  //                         {window.electron.process.env.npm_package_name}:
-  //                         {window.electron.process.env.npm_package_version}
-  //                       </Typography.Text>
-  //                     </Menu.Item>
-  //                     <Menu.Item>
-  //                       <Button
-  //                         onClick={() => {
-  //                           // window.Kakao.Auth.authorize({
-  //                           //   redirectUri: "http://localhost:8888",
-  //                           //   prompt: "login",
-  //                           //   scope: "talk_message"
-  //                           // });
-
-  //                           window.open(
-  //                             "https://accounts.kakao.com/login/?login_type=normal&continue=https%3A%2F%2Fkauth.kakao.com%2Foauth%2Fauthorize%3Fis_popup%3Dfalse%26ka%3Dsdk%252F2.7.2%2520os%252Fjavascript%2520sdk_type%252Fjavascript%2520lang%252Fko%2520device%252FMacIntel%2520origin%252Fhttp%25253A%25252F%25252Flocalhost%25253A5173%26scope%3Dtalk_message%26auth_tran_id%3DpxIwiQQmJkwchDO4.QlJnytF3DOxoQOd5qVBdueEhwaSTmKdHT~iQ3Q4_u~G%26response_type%3Dcode%26redirect_uri%3Dhttp%253A%252F%252Flocalhost%253A8888%26through_account%3Dtrue%26client_id%3D8aa1c2976d9ae39d730c75ba97629117&talk_login=hidden#login"
-  //                           );
-  //                         }}
-  //                       >
-  //                         카카오 로그인 테스트
-  //                       </Button>
-  //                     </Menu.Item>
-  //                   </Menu.ItemGroup>
-  //                 </Menu>
-  //                 <div style={{ flex: 1, height: "100vh", overflow: "scroll" }}>
-  //                   <Outlet />
-  //                 </div>
-  //               </div>
-  //             }
-  //           >
-  //             <Route index element={<HomePage />} />
-  //             <Route path="macros" element={<TaskPage />} />
-  //             <Route path="tickets" element={<MyTicketsPage />} />
-  //           </Route>
-  //         )
-  //       )
-  //     ),
-  //   [me]
-  // );
 
   const queryClient = new QueryClient();
 
@@ -248,11 +185,16 @@ function App(): JSX.Element {
             ]);
           },
           removeTask: (task) => {
-            setTasks(tasks.filter((t) => !_.isEqual(task, t)));
+            setTasks(tasks.filter((t) => !_.isEqual(task.schedule, t.schedule)));
           },
           kakao: {
             canSendMessage: !!authResponse,
             sendMessage
+          },
+          mail: {
+            email,
+            setEmail,
+            removeEmail: () => setEmail(null)
           }
         }}
       >

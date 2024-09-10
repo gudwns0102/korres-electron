@@ -56,6 +56,7 @@ function createWindow(): void {
   mainWindow.webContents.once("did-finish-load", () => {
     const Axios = require("axios");
     const Fastify = require("fastify");
+    const nodemailer = require("nodemailer");
     const fastify: FastifyInstance = Fastify({});
     const axios: AxiosInstance = Axios.create({});
 
@@ -105,6 +106,34 @@ function createWindow(): void {
       } catch (error) {
         console.log((error as any).response);
         reply.send("fail");
+      }
+    });
+
+    fastify.post("/notify", {
+      schema: {
+        querystring: {
+          type: "object",
+          properties: {
+            email: { type: "string" }
+          },
+          required: ["email"]
+        }
+      },
+      handler: async (req, res) => {
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: { user: "sejong3408@gmail.com", pass: "tiye uzmm vnqs cqfd" }
+        });
+
+        const mailOptions = {
+          to: (req.query as any).email,
+          subject: "가입 인증 메일",
+          html: `<div>예매 완료. 코레일 앱 > 예약 내역 확인에서 결제 진행 필요.</div>`
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.send(req.query);
       }
     });
 
