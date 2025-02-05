@@ -12,7 +12,7 @@ export const AppContext = createContext<{
   session: KorailSession;
   me: LoginSuccessResponse | null;
   tasks: Task[];
-  addTask: (schedule: Schedule) => void;
+  addTask: (schedule: Schedule, seat_count: number) => void;
   removeTask: (task: Task) => void;
   kakao: {
     canSendMessage: boolean;
@@ -126,7 +126,7 @@ function App(): JSX.Element {
     if (me && tasks.length > 0) {
       const intervals = tasks.map((task, index) =>
         setInterval(async () => {
-          const response = await session.reserve(task.schedule);
+          const response = await session.reserve(task.schedule, task.seat_count);
 
           if (response.data.strResult === "SUCC") {
             window.electron.ipcRenderer.send(
@@ -180,7 +180,7 @@ function App(): JSX.Element {
           session,
           me,
           tasks: tasks.map((task, index) => ({ ...task, latest_result: latestResults[index] })),
-          addTask: (schedule) => {
+          addTask: (schedule, seat_count) => {
             if (_.find(tasks, ({ schedule: s }) => _.isEqual(s, schedule))) {
               window.alert("이미 추가된 스케줄입니다.");
               return;
@@ -191,6 +191,7 @@ function App(): JSX.Element {
               {
                 id: schedule.h_trn_no,
                 schedule,
+                seat_count,
                 retries: 0,
                 interval: 5000,
                 created_at: new Date().toISOString(),

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_layout")({
               )}
             </Menu.Item>
             <Menu.Item icon={<ShoppingOutlined />}>
-              <Link to="/tickets">나의 티켓</Link>
+              <Link to="/reservations">예약 승차권</Link>
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.Divider />

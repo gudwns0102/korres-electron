@@ -13,8 +13,8 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as LayoutTicketsImport } from './routes/_layout/tickets'
 import { Route as LayoutTasksImport } from './routes/_layout/tasks'
+import { Route as LayoutReservationsImport } from './routes/_layout/reservations'
 
 // Create/Update Routes
 
@@ -28,13 +28,13 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutTicketsRoute = LayoutTicketsImport.update({
-  path: '/tickets',
+const LayoutTasksRoute = LayoutTasksImport.update({
+  path: '/tasks',
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutTasksRoute = LayoutTasksImport.update({
-  path: '/tasks',
+const LayoutReservationsRoute = LayoutReservationsImport.update({
+  path: '/reservations',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -49,18 +49,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
+    '/_layout/reservations': {
+      id: '/_layout/reservations'
+      path: '/reservations'
+      fullPath: '/reservations'
+      preLoaderRoute: typeof LayoutReservationsImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/tasks': {
       id: '/_layout/tasks'
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof LayoutTasksImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/tickets': {
-      id: '/_layout/tickets'
-      path: '/tickets'
-      fullPath: '/tickets'
-      preLoaderRoute: typeof LayoutTicketsImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/': {
@@ -76,14 +76,14 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface LayoutRouteChildren {
+  LayoutReservationsRoute: typeof LayoutReservationsRoute
   LayoutTasksRoute: typeof LayoutTasksRoute
-  LayoutTicketsRoute: typeof LayoutTicketsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutReservationsRoute: LayoutReservationsRoute,
   LayoutTasksRoute: LayoutTasksRoute,
-  LayoutTicketsRoute: LayoutTicketsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 
@@ -92,35 +92,35 @@ const LayoutRouteWithChildren =
 
 export interface FileRoutesByFullPath {
   '': typeof LayoutRouteWithChildren
+  '/reservations': typeof LayoutReservationsRoute
   '/tasks': typeof LayoutTasksRoute
-  '/tickets': typeof LayoutTicketsRoute
   '/': typeof LayoutIndexRoute
 }
 
 export interface FileRoutesByTo {
+  '/reservations': typeof LayoutReservationsRoute
   '/tasks': typeof LayoutTasksRoute
-  '/tickets': typeof LayoutTicketsRoute
   '/': typeof LayoutIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_layout': typeof LayoutRouteWithChildren
+  '/_layout/reservations': typeof LayoutReservationsRoute
   '/_layout/tasks': typeof LayoutTasksRoute
-  '/_layout/tickets': typeof LayoutTicketsRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/tasks' | '/tickets' | '/'
+  fullPaths: '' | '/reservations' | '/tasks' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/tasks' | '/tickets' | '/'
+  to: '/reservations' | '/tasks' | '/'
   id:
     | '__root__'
     | '/_layout'
+    | '/_layout/reservations'
     | '/_layout/tasks'
-    | '/_layout/tickets'
     | '/_layout/'
   fileRoutesById: FileRoutesById
 }
@@ -151,17 +151,17 @@ export const routeTree = rootRoute
     "/_layout": {
       "filePath": "_layout.tsx",
       "children": [
+        "/_layout/reservations",
         "/_layout/tasks",
-        "/_layout/tickets",
         "/_layout/"
       ]
     },
-    "/_layout/tasks": {
-      "filePath": "_layout/tasks.tsx",
+    "/_layout/reservations": {
+      "filePath": "_layout/reservations.tsx",
       "parent": "/_layout"
     },
-    "/_layout/tickets": {
-      "filePath": "_layout/tickets.tsx",
+    "/_layout/tasks": {
+      "filePath": "_layout/tasks.tsx",
       "parent": "/_layout"
     },
     "/_layout/": {

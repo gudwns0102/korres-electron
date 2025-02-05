@@ -1,6 +1,7 @@
 type Task = {
   id: string;
   schedule: import("korail-ts").Schedule;
+  seat_count: number;
   interval: number;
   retries: number;
   created_at: string;

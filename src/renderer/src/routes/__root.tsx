@@ -4,6 +4,8 @@ import { AppContext } from "@renderer/App";
 import { Button, Form, FormProps, Input, Typography } from "antd";
 import { useContext } from "react";
 import { useSession } from "../hooks/useSession";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useLocalStorage } from "usehooks-ts";
 
 type FieldType = {
   id?: string;
@@ -12,21 +14,27 @@ type FieldType = {
 
 export const Route = createRootRoute({
   component: () => {
+    const queryClient = new QueryClient();
+
     const { me } = useContext(AppContext);
 
-    if (!me) return <LoginPage />;
-
-    return <Outlet />;
+    return (
+      <QueryClientProvider client={queryClient}>
+        {me ? <Outlet /> : <LoginPage />}
+      </QueryClientProvider>
+    );
   }
 });
 
 function LoginPage() {
   const session = useSession();
+  const [id, setId] = useLocalStorage("id", "");
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     if (values.id && values.password) {
       try {
         await session.login(values.id, values.password);
+        setId(values.id);
       } catch (error) {
         window.alert(error);
       }
@@ -49,6 +57,9 @@ function LoginPage() {
     >
       <Form
         style={{ width: "100%", maxWidth: 300 }}
+        initialValues={{
+          id
+        }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
       >
@@ -57,13 +68,13 @@ function LoginPage() {
           name="id"
           rules={[{ required: true, message: "코레일 회원번호를 입력해 주세요" }]}
         >
-          <Input autoFocus placeholder="코레일 회원번호" defaultValue={""} />
+          <Input autoFocus placeholder="코레일 회원번호" />
         </Form.Item>
         <Form.Item<FieldType>
           name="password"
           rules={[{ required: true, message: "코레일 회원번호를 입력해 주세요" }]}
         >
-          <Input type="password" placeholder="비밀번호" defaultValue={""} />
+          <Input type="password" placeholder="비밀번호" />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" className="login-form-button">

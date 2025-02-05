@@ -42,6 +42,11 @@ function Page() {
           }
         },
         {
+          key: "seat_count",
+          title: "좌석수",
+          dataIndex: "seat_count"
+        },
+        {
           key: "latest_result",
           title: "최근 결과",
           dataIndex: "latest_result",

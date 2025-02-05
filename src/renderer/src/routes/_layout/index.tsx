@@ -3,9 +3,9 @@ import { AppContext } from "@renderer/App";
 import { useSession } from "@renderer/hooks/useSession";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Button, DatePicker, Select, Table, Typography } from "antd";
+import { Button, DatePicker, InputNumber, Select, Table, Typography } from "antd";
 import dayjs from "dayjs";
-import { hhmmss, Schedule, Station, YYYYMMDD } from "korail-ts";
+import { hhmmss, Schedule, Station } from "korail-ts";
 import _ from "lodash";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -21,6 +21,7 @@ function Page() {
   const [from, setFrom] = useLocalStorage("from", "서울");
   const [to, setTo] = useLocalStorage("to", "부산");
   const [date, setDate] = useState<dayjs.Dayjs>(dayjs());
+  const [count, setCount] = useState(1);
   const YYYYMMDD = useMemo(() => date.format("YYYYMMDD") as YYYYMMDD, [date]);
 
   const [stations, setStations] = useState<Array<Station>>([]);
@@ -115,6 +116,10 @@ function Page() {
             minDate={dayjs()}
           />
         </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Typography.Text>좌석수</Typography.Text>
+          <InputNumber min={1} max={10} defaultValue={1} onChange={(e) => setCount(e || 1)} />
+        </div>
       </div>
       <Table
         style={{ width: "100%", flex: 1, overflow: "auto" }}
@@ -173,7 +178,7 @@ function Page() {
                   예매 취소
                 </Button>
               ) : (
-                <Button type="primary" onClick={() => addTask(record)}>
+                <Button type="primary" onClick={() => addTask(record, count)}>
                   예매 시작
                 </Button>
               );
