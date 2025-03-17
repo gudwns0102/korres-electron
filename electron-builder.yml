@@ -19,18 +19,21 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  identity: "HYUNGJUN KIM (MRV3RDV46P)"
   hardenedRuntime: true
   gatekeeperAssess: false
+  entitlements: "build/entitlements.mac.plist"
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+  notarize: 
+    teamId: MRV3RDV46P
 dmg:
   artifactName: ${name}-${version}.${ext}
-  sign: false
+  sign: true
 linux:
   target:
     - AppImage
@@ -46,3 +49,4 @@ publish:
   url: https://example.com/auto-updates
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
+afterSign: "build/notarize.js"

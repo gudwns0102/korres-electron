@@ -1,6 +1,14 @@
-import { CalendarOutlined, LogoutOutlined, ShoppingOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  LogoutOutlined,
+  ShoppingOutlined
+} from "@ant-design/icons";
 import { AppContext } from "@renderer/App";
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet
+} from "@tanstack/react-router";
 import { Input, Menu, Typography } from "antd";
 import { useContext } from "react";
 
@@ -10,7 +18,14 @@ export const Route = createFileRoute("/_layout")({
 
     return (
       <div style={{ display: "flex" }}>
-        <Menu style={{ width: 256, height: "100vh", overflow: "scroll" }} mode="inline">
+        <Menu
+          style={{
+            width: 256,
+            height: "100vh",
+            overflow: "scroll"
+          }}
+          mode="inline"
+        >
           <Menu.ItemGroup title="예매">
             <Menu.Item icon={<CalendarOutlined />}>
               <Link to="/">열차 목록</Link>
@@ -18,7 +33,10 @@ export const Route = createFileRoute("/_layout")({
             <Menu.Item icon={<ShoppingOutlined />}>
               <Link to="/tasks">매크로 내역</Link>
               {tasks.length > 0 && (
-                <Typography.Text type="secondary"> ({tasks.length})</Typography.Text>
+                <Typography.Text type="secondary">
+                  {" "}
+                  ({tasks.length})
+                </Typography.Text>
               )}
             </Menu.Item>
             <Menu.Item icon={<ShoppingOutlined />}>
@@ -28,16 +46,19 @@ export const Route = createFileRoute("/_layout")({
           <Menu.Divider />
           <Menu.ItemGroup title="인증정보">
             <Menu.Item disabled>
-              <Typography.Text>You are: {me?.strCustNm}</Typography.Text>
+              <Typography.Text>
+                You are: {me?.strCustNm}
+              </Typography.Text>
             </Menu.Item>
-            <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={session?.logout}>
+            <Menu.Item
+              key="logout"
+              icon={<LogoutOutlined />}
+              onClick={session?.logout}
+            >
               로그아웃
             </Menu.Item>
             <Menu.Item disabled>
-              <Typography.Text>
-                {window.electron.process.env.npm_package_name}:
-                {window.electron.process.env.npm_package_version}
-              </Typography.Text>
+              <Typography.Text>v1.0.2</Typography.Text>
             </Menu.Item>
             <Menu.Item>
               <Input
@@ -48,7 +69,9 @@ export const Route = createFileRoute("/_layout")({
             </Menu.Item>
           </Menu.ItemGroup>
         </Menu>
-        <div style={{ flex: 1, height: "100vh", overflow: "scroll" }}>
+        <div
+          style={{ flex: 1, height: "100vh", overflow: "scroll" }}
+        >
           <Outlet />
         </div>
       </div>
